@@ -104,12 +104,6 @@ Validation runs in the handler layer and returns `400 Bad Request` with descript
 - `internal/validator` — validation helpers and custom rules
 - `db/sqlc` — sqlc-generated DB code (if using Postgres)
 
-## Next steps / notes
-
-- Consider adding `golang-migrate` for migrations and a `Makefile` or `taskfile` for common tasks
-- Add integration tests that run against a temporary Postgres instance (docker-compose or Testcontainers)
-- Add OpenAPI/Swagger spec for API documentation
-
 ---
 
 Original submission: internship task for Ainyx solutions.
