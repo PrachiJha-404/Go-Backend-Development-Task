@@ -132,12 +132,45 @@ This prevents data corruption and ensures clean deployments.
 - **Observability**: Comprehensive logging for debugging and monitoring
 
 ### What Could Be Improved with More Time
-- **Input validation**: Could add more robust validation (e.g., name length, date ranges, SQL injection prevention through prepared statements is already handled by sqlc)
-- **Unit tests**: Would add comprehensive test coverage for handlers, services, and repositories
 - **API documentation**: Could add OpenAPI/Swagger documentation
 - **Rate limiting**: Could add rate limiting middleware to prevent abuse
 - **Pagination**: List endpoint could benefit from pagination for large datasets
 - **Database migrations**: Could add a migration tool like golang-migrate for version control
+
+## Testing Strategy
+
+### System Tests
+Created a comprehensive system test suite (`cmd/test/main.go`) that validates the entire workflow without requiring a database connection. The test suite includes:
+
+- **CRUD Operations**: Tests for Create, Read (Get), Update, Delete, and List operations
+- **Validation Integration**: Tests that validation rules properly reject invalid input (empty names, invalid date formats, future dates, names exceeding 255 characters)
+- **Error Handling**: Tests for non-existent user retrieval, database failure simulation, and error propagation through layers
+- **Full Workflows**: End-to-end tests combining multiple operations (create → update → get → delete)
+- **Repository State Verification**: Confirms the in-memory repository maintains correct state
+
+**Key Innovation**: Built a `MockUserRepository` that implements the `UserRepository` interface without touching the database, allowing tests to run independently of PostgreSQL availability.
+
+### Age Calculation Unit Tests
+Dedicated unit tests (`RunAgeCalculationTests()` in `cmd/test/main.go`) verify the age calculation logic handles edge cases correctly:
+
+- **Birthday Logic**: Tests that age increments only after the birthday has passed in the current year
+- **Edge Cases**: 
+  - Person born today (age 0)
+  - Person born 1 year ago (age 1)
+  - Person born 30 years ago
+  - Person born before/after birthday this year
+  - Person born in leap year (Feb 29)
+  - Classic test case (1990-05-15)
+
+All tests pass, confirming the age calculation is accurate and handles edge cases properly.
+
+### Running Tests
+Execute with:
+```bash
+go run cmd\test\main.go
+```
+
+This runs all age calculation unit tests followed by the complete system test suite (14 tests total, all passing).
 
 ## Why This Architecture?
 

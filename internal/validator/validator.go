@@ -27,7 +27,7 @@ func NewValidator() *Validator {
 // ValidateStruct validates a struct and returns formatted error messages
 func (v *Validator) ValidateStruct(data interface{}) error {
 	if err := v.validate.Struct(data); err != nil {
-		return fmt.Errorf(formatValidationErrors(err))
+		return fmt.Errorf("%s", formatValidationErrors(err))
 	}
 	return nil
 }
