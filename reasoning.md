@@ -72,6 +72,24 @@ I implemented defensive error handling throughout:
 
 The error responses use a consistent `fiber.Map{"error": "message"}` format, making it easy for API consumers to handle errors programmatically.
 
+### 8. Input Validation with go-playground/validator
+I implemented robust input validation using the `go-playground/validator` library (`internal/validator/`). This decision provides:
+- **Declarative Validation**: Validation rules are defined as struct tags, making them visible alongside model definitions
+- **Custom Rules**: Created custom validators for date format validation and future date prevention
+- **User-Friendly Errors**: Validation errors return descriptive messages like "DOB must be in YYYY-MM-DD format" instead of generic errors
+- **Separation of Concerns**: Validation is isolated in its own layer, keeping handlers clean
+- **Consistency**: All request validation follows the same pattern and rules
+
+The validator integration:
+- Validates request DTOs (`CreateUserRequest`, `UpdateUserRequest`) in the handler layer
+- Returns `400 Bad Request` with detailed error messages when validation fails
+- Logs validation failures for debugging
+- Prevents invalid data from reaching the service layer
+
+Validation rules enforced:
+- Name: required, 1-255 characters
+- DOB: required, YYYY-MM-DD format, cannot be a future date
+
 ### 8. Date Handling and Age Calculation
 Dates are handled as strings in API requests (`"2006-01-02"` format) but stored and processed as `time.Time` internally. The age calculation function:
 - Accurately handles birthday edge cases (checks month and day)

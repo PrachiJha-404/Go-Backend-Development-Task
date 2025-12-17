@@ -6,20 +6,23 @@ import (
 	"time"
 	"user-api/internal/models"
 	"user-api/internal/service"
+	"user-api/internal/validator"
 
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 )
 
 type UserHandler struct {
-	service service.UserService
-	logger  *zap.Logger
+	service   service.UserService
+	logger    *zap.Logger
+	validator *validator.Validator
 }
 
 func NewUserHandler(service service.UserService, logger *zap.Logger) *UserHandler {
 	return &UserHandler{
-		service: service,
-		logger:  logger,
+		service:   service,
+		logger:    logger,
+		validator: validator.NewValidator(),
 	}
 }
 
@@ -50,6 +53,13 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
+
+	// Validate the request
+	if err := h.validator.ValidateStruct(req); err != nil {
+		h.logger.Warn("validation failed for create user", zap.Error(err))
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	dob, err := time.Parse("2006-01-02", req.DOB)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid date format (Use YYYY-MM-DD)"})
@@ -65,12 +75,19 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 32)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
 	}
 	var req models.UpdateUserRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
+
+	// Validate the request
+	if err := h.validator.ValidateStruct(req); err != nil {
+		h.logger.Warn("validation failed for update user", zap.Error(err))
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	dob, err := time.Parse("2006-01-02", req.DOB)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid data format (use YYYY-MM-DD)"})
