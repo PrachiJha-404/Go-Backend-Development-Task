@@ -112,8 +112,4 @@ Validation runs in the handler layer and returns `400 Bad Request` with descript
 
 ---
 
-If you'd like, I can add a small `Makefile` or PowerShell script to simplify the common flows (start server, run tests, create DB user).
-
----
-
 Original submission: internship task for Ainyx solutions.
